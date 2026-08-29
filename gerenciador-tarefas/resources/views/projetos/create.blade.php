@@ -1,0 +1,75 @@
+@extends('layouts.app')
+
+@section('title', 'Novo Projeto')
+
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <h4><i class="bi bi-plus-circle"></i> Novo Projeto</h4>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('projetos.store') }}" method="POST">
+            @csrf
+            
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome do Projeto *</label>
+                <input type="text" class="form-control @error('nome') is-invalid @enderror" 
+                       id="nome" name="nome" value="{{ old('nome') }}" required>
+                @error('nome')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control @error('descricao') is-invalid @enderror" 
+                          id="descricao" name="descricao" rows="3">{{ old('descricao') }}</textarea>
+                @error('descricao')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="data_inicio" class="form-label">Data de Início *</label>
+                    <input type="date" class="form-control @error('data_inicio') is-invalid @enderror" 
+                           id="data_inicio" name="data_inicio" value="{{ old('data_inicio') }}" required>
+                    @error('data_inicio')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="data_fim" class="form-label">Data de Término</label>
+                    <input type="date" class="form-control @error('data_fim') is-invalid @enderror" 
+                           id="data_fim" name="data_fim" value="{{ old('data_fim') }}">
+                    @error('data_fim')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
+                    <option value="planejado" {{ old('status') == 'planejado' ? 'selected' : '' }}>Planejado</option>
+                    <option value="em_andamento" {{ old('status') == 'em_andamento' ? 'selected' : '' }}>Em Andamento</option>
+                    <option value="concluido" {{ old('status') == 'concluido' ? 'selected' : '' }}>Concluído</option>
+                    <option value="cancelado" {{ old('status') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+                </select>
+                @error('status')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ route('projetos.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection
