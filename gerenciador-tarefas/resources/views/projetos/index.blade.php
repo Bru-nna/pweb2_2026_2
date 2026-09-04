@@ -10,6 +10,31 @@
     </a>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <form action="{{ route('projetos.search') }}" method="POST" class="row g-2 align-items-end">
+            @csrf
+            <div class="col-md-4">
+                <label for="tipo" class="form-label mb-1">Buscar por</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="nome">Nome</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="valor" class="form-label mb-1">Termo</label>
+                <input type="text" name="valor" id="valor" class="form-control" placeholder="Digite para buscar...">
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if($projetos->isEmpty())
     <div class="alert alert-info">
         <i class="bi bi-info-circle"></i> Nenhum projeto cadastrado.
@@ -43,6 +68,13 @@
                             <p class="mb-1">
                                 <strong>Responsáveis:</strong> 
                                 <span class="text-muted">{{ $projeto->responsaveis }}</span>
+                            </p>
+                        @endif
+
+                        @if($projeto->responsavel)
+                            <p class="mb-1">
+                                <strong>Responsável:</strong>
+                                <span class="badge bg-secondary">{{ $projeto->responsavel->name }}</span>
                             </p>
                         @endif
 
@@ -112,4 +144,6 @@
         @endforeach
     </div>
 @endif
+
+                        
 @endsection

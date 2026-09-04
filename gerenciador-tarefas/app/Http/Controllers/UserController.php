@@ -92,4 +92,16 @@ class UserController extends Controller
         return redirect()->route('users.index')
                          ->with('success', 'Usuário excluído com sucesso!');
     }
+
+        public function search(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->filled('valor')) {
+            $query->where($request->tipo, 'like', "%{$request->valor}%");
+        }
+
+        $users = $query->get();
+        return view('users.index', compact('users'));
+    }
 }

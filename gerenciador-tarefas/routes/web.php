@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
 
     // Projetos
     Route::get('/projetos', [ProjetoController::class, 'index'])->name('projetos.index');
+    Route::post('/projetos/search', [ProjetoController::class, 'search'])->name('projetos.search');
     Route::get('/projetos/create', [ProjetoController::class, 'create'])->name('projetos.create');
     Route::post('/projetos/store', [ProjetoController::class, 'store'])->name('projetos.store');
     Route::get('/projetos/edit/{id}', [ProjetoController::class, 'edit'])->name('projetos.edit');
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () {
 
     // Categorias
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
+    Route::post('/categorias/search', [CategoriaController::class, 'search'])->name('categorias.search');
     Route::get('/categorias/create', [CategoriaController::class, 'create'])->name('categorias.create');
     Route::post('/categorias/store', [CategoriaController::class, 'store'])->name('categorias.store');
     Route::get('/categorias/edit/{id}', [CategoriaController::class, 'edit'])->name('categorias.edit');
@@ -51,4 +53,5 @@ Route::middleware('auth')->group(function () {
     Route::patch('/tarefas/{id}/toggle', [TarefaController::class, 'toggleStatus'])->name('tarefas.toggle');
 
     Route::resource('users', UserController::class);
+    Route::post('/users/search', [UserController::class, 'search'])->name('users.search');
 });

@@ -56,4 +56,18 @@ class CategoriaController extends Controller
         Categoria::destroy($id);
         return redirect('categorias')->with("success", 'Registro removido com sucesso!');
     }
+
+        public function search(Request $request)
+    {
+        $query = Categoria::with(['tarefas' => function ($q) {
+            $q->with('projeto')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+        }]);
+
+        if (!empty($request->valor)) {
+            $query->where($request->tipo, 'like', "%{$request->valor}%");
+        }
+
+        $categorias = $query->get();
+        return view('categorias.index', compact('categorias'));
+    }
 }

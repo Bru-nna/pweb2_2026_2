@@ -17,11 +17,17 @@ class Projeto extends Model
         'orcamento',
         'data_inicio',
         'data_fim',
-        'status'
+        'status',
+        'responsavel_id' 
     ];
 
     public function tarefas()
     {
         return $this->hasMany(Tarefa::class);
+    }
+
+    public function responsavel()
+    {
+        return $this->belongsTo(User::class, 'responsavel_id');
     }
 }

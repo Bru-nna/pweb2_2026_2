@@ -18,6 +18,10 @@
             <p><strong> Responsáveis:</strong> {{ $projeto->responsaveis }}</p>
         @endif
 
+        @if($projeto->responsavel)
+            <p><strong>Responsável:</strong> {{ $projeto->responsavel->name }} <small class="text-muted">({{ $projeto->responsavel->email }})</small></p>
+        @endif
+
         @if($projeto->cliente)
             <p><strong> Cliente:</strong> {{ $projeto->cliente }}</p>
         @endif

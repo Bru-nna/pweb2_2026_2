@@ -32,10 +32,10 @@ class User extends Authenticatable
         ];
     }
 
-    // Relacionamento com projetos (se um usuário pode ter projetos)
-    public function projetos()
+        // Relacionamento 1:1 -> Usuário é responsável por um Projeto
+    public function projetoResponsavel()
     {
-        return $this->hasMany(Projeto::class);
+        return $this->hasOne(Projeto::class, 'responsavel_id');
     }
 
     // Relacionamento com tarefas (se um usuário pode ter tarefas)

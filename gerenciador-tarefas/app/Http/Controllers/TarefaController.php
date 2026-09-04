@@ -73,15 +73,14 @@ class TarefaController extends Controller
 
     public function search(Request $request)
     {
+        $query = Tarefa::with(['projeto', 'categoria'])
+            ->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+
         if (!empty($request->valor)) {
-            $tarefas = Tarefa::where(
-                $request->tipo,
-                'like',
-                "%$request->valor%"
-            )->get();
-        } else {
-            $tarefas = Tarefa::All();
+            $query->where($request->tipo, 'like', "%{$request->valor}%");
         }
+
+        $tarefas = $query->get();
         return view('tarefas.index', compact('tarefas'));
     }
 

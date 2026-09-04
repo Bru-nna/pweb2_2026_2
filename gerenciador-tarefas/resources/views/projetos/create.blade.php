@@ -39,6 +39,23 @@
                 <small class="text-muted">Separe os nomes por vírgula.</small>
             </div>
 
+                        <div class="mb-3">
+                <label for="responsavel_id" class="form-label">Responsável (Usuário) — relacionamento 1:1</label>
+                <select class="form-select @error('responsavel_id') is-invalid @enderror"
+                        id="responsavel_id" name="responsavel_id">
+                    <option value="">Selecione um responsável...</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" {{ old('responsavel_id') == $user->id ? 'selected' : '' }}>
+                            {{ $user->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('responsavel_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <small class="text-muted">Cada projeto tem um único usuário responsável.</small>
+            </div>
+
             <div class="mb-3">
                 <label for="cliente" class="form-label">Cliente</label>
                 <input type="text" class="form-control @error('cliente') is-invalid @enderror" 
