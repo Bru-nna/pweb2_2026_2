@@ -20,6 +20,7 @@
         <table class="table table-hover">
             <thead>
                 <tr>
+                    <th class="text-center">Concluir</th>
                     <th>Título</th>
                     <th>Projeto</th>
                     <th>Categoria</th>
@@ -31,8 +32,19 @@
             </thead>
             <tbody>
                 @foreach($tarefas as $tarefa)
-                    <tr>
-                        <td>{{ $tarefa->titulo }}</td>
+                    <tr data-tarefa-row="{{ $tarefa->id }}" class="{{ $tarefa->status === 'concluida' ? 'table-success' : '' }}">
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   class="form-check-input tarefa-toggle-checkbox"
+                                   data-tarefa-id="{{ $tarefa->id }}"
+                                   data-toggle-url="{{ route('tarefas.toggle', $tarefa->id) }}"
+                                   {{ $tarefa->status === 'concluida' ? 'checked' : '' }}>
+                        </td>
+                        <td>
+                            <span data-tarefa-titulo="{{ $tarefa->id }}" class="{{ $tarefa->status === 'concluida' ? 'text-decoration-line-through text-muted' : '' }}">
+                                {{ $tarefa->titulo }}
+                            </span>
+                        </td>
                         <td>{{ $tarefa->projeto->nome }}</td>
                         <td>
                             <span class="badge" style="background-color: {{ $tarefa->categoria->cor }};">
@@ -52,7 +64,7 @@
                             @endif
                         </td>
                         <td>
-                            <span class="badge bg-{{ $tarefa->status == 'concluida' ? 'success' : ($tarefa->status == 'cancelada' ? 'danger' : ($tarefa->status == 'em_andamento' ? 'warning' : 'secondary')) }}">
+                            <span class="badge bg-{{ $tarefa->status == 'concluida' ? 'success' : ($tarefa->status == 'cancelada' ? 'danger' : ($tarefa->status == 'em_andamento' ? 'warning' : 'secondary')) }}" data-tarefa-status="{{ $tarefa->id }}">
                                 {{ ucfirst(str_replace('_', ' ', $tarefa->status)) }}
                             </span>
                         </td>

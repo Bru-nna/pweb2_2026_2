@@ -2,66 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Projeto;
 use Illuminate\Http\Request;
+use App\Models\Projeto;
 
 class ProjetoController extends Controller
 {
     public function index()
     {
-        $projetos = Projeto::all();
-        return view('projetos.index', compact('projetos'));
+        $projetos = Projeto::with(['tarefas' => function ($query) {
+            $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+        }])->get();
+        return view('projetos.index')->with(['projetos' => $projetos]);
     }
 
-    public function create()
+    function create()
     {
         return view('projetos.create');
     }
 
-    public function store(Request $request)
+    function validateForm(Request $request)
     {
-        $validated = $request->validate([
-            'nome' => 'required|max:255',
-            'descricao' => 'nullable',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date|after:data_inicio',
-            'status' => 'required|in:planejado,em_andamento,concluido,cancelado'
+        $request->validate([
+            'nome' => 'required',
+            'data_inicio' => 'required',
+            'status' => 'required',
+        ], [
+            'nome.required' => "O :attribute é obrigatorio",
+            'data_inicio.required' => "O :attribute é obrigatorio",
+            'status.required' => "O :attribute é obrigatorio"
         ]);
-
-        Projeto::create($validated);
-        return redirect()->route('projetos.index')
-                         ->with('success', 'Projeto criado com sucesso!');
     }
 
-    public function show(Projeto $projeto)
+    function store(Request $request)
     {
+        //dd($request->all());
+        $this->validateForm($request);
+        Projeto::create($request->all());
+        return redirect('projetos')->with("success", 'Registro Salvo com sucesso!');
+    }
+
+    function show($id)
+    {
+        $projeto = Projeto::find($id);
+        $projeto->load(['tarefas' => function ($query) {
+            $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+        }]);
         return view('projetos.show', compact('projeto'));
     }
 
-    public function edit(Projeto $projeto)
+    function edit($id)
     {
+        $projeto = Projeto::find($id);
         return view('projetos.edit', compact('projeto'));
     }
 
-    public function update(Request $request, Projeto $projeto)
+    function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'nome' => 'required|max:255',
-            'descricao' => 'nullable',
-            'data_inicio' => 'required|date',
-            'data_fim' => 'nullable|date|after:data_inicio',
-            'status' => 'required|in:planejado,em_andamento,concluido,cancelado'
-        ]);
-
-        $projeto->update($validated);
-        return redirect()->route('projetos.index')
-                         ->with('success', 'Projeto atualizado com sucesso!');
+        //dd($request->all());
+        $this->validateForm($request);
+        Projeto::find($id)->update($request->all());
+        return redirect('projetos')->with("success", 'Registro Atualizado com sucesso!');
     }
 
-    public function destroy(Projeto $projeto)
+    function destroy($id)
     {
-        $projeto->delete();
-        return redirect()->route('projetos.index')
-                         ->with('success', 'Projeto excluído com sucesso!');
+        Projeto::destroy($id);
+        return redirect('projetos')->with("success", 'Registro removido com sucesso!');
     }
 }

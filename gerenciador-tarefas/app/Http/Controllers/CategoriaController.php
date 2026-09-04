@@ -2,62 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categoria;
 use Illuminate\Http\Request;
+use App\Models\Categoria;
 
 class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::all();
-        return view('categorias.index', compact('categorias'));
+        $categorias = Categoria::with(['tarefas' => function ($query) {
+            $query->with('projeto')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+        }])->get();
+        return view('categorias.index')->with(['categorias' => $categorias]);
     }
 
-    public function create()
+    function create()
     {
         return view('categorias.create');
     }
 
-    public function store(Request $request)
+    function validateForm(Request $request)
     {
-        $validated = $request->validate([
-            'nome' => 'required|max:255',
-            'descricao' => 'nullable',
-            'cor' => 'nullable|max:7'
+        $request->validate([
+            'nome' => 'required',
+        ], [
+            'nome.required' => "O :attribute é obrigatorio",
         ]);
-
-        Categoria::create($validated);
-        return redirect()->route('categorias.index')
-                         ->with('success', 'Categoria criada com sucesso!');
     }
 
-    public function show(Categoria $categoria)
+    function store(Request $request)
     {
-        return view('categorias.show', compact('categoria'));
+        //dd($request->all());
+        $this->validateForm($request);
+        Categoria::create($request->all());
+        return redirect('categorias')->with("success", 'Registro Salvo com sucesso!');
     }
 
-    public function edit(Categoria $categoria)
+    function edit($id)
     {
+        $categoria = Categoria::find($id);
         return view('categorias.edit', compact('categoria'));
     }
 
-    public function update(Request $request, Categoria $categoria)
+    function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'nome' => 'required|max:255',
-            'descricao' => 'nullable',
-            'cor' => 'nullable|max:7'
-        ]);
-
-        $categoria->update($validated);
-        return redirect()->route('categorias.index')
-                         ->with('success', 'Categoria atualizada com sucesso!');
+        //dd($request->all());
+        $this->validateForm($request);
+        Categoria::find($id)->update($request->all());
+        return redirect('categorias')->with("success", 'Registro Atualizado com sucesso!');
     }
 
-    public function destroy(Categoria $categoria)
+    function destroy($id)
     {
-        $categoria->delete();
-        return redirect()->route('categorias.index')
-                         ->with('success', 'Categoria excluída com sucesso!');
+        Categoria::destroy($id);
+        return redirect('categorias')->with("success", 'Registro removido com sucesso!');
     }
 }

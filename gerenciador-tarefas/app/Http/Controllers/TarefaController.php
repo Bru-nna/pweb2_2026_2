@@ -2,76 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Tarefa;
 use App\Models\Projeto;
 use App\Models\Categoria;
-use Illuminate\Http\Request;
 
 class TarefaController extends Controller
 {
     public function index()
     {
-        $tarefas = Tarefa::with(['projeto', 'categoria'])->get();
-        return view('tarefas.index', compact('tarefas'));
+        $tarefas = Tarefa::with(['projeto', 'categoria'])
+            ->orderByRaw('data_vencimento IS NULL, data_vencimento ASC')
+            ->get();
+        return view('tarefas.index')->with(['tarefas' => $tarefas]);
     }
 
-    public function create()
+    function create()
     {
-        $projetos = Projeto::all();
-        $categorias = Categoria::all();
+        $projetos = Projeto::orderBy('nome')->get();
+        $categorias = Categoria::orderBy('nome')->get();
         return view('tarefas.create', compact('projetos', 'categorias'));
     }
 
-    public function store(Request $request)
+    function validateForm(Request $request)
     {
-        $validated = $request->validate([
-            'titulo' => 'required|max:255',
-            'descricao' => 'nullable',
-            'prioridade' => 'required|in:baixa,media,alta,urgente',
-            'data_vencimento' => 'nullable|date',
-            'status' => 'required|in:pendente,em_andamento,concluida,cancelada',
-            'projeto_id' => 'required|exists:projetos,id',
-            'categoria_id' => 'required|exists:categorias,id'
+        $request->validate([
+            'titulo' => 'required',
+            'prioridade' => 'required',
+            'status' => 'required',
+            'projeto_id' => 'required',
+            'categoria_id' => 'required',
+        ], [
+            'titulo.required' => "O :attribute é obrigatorio",
+            'prioridade.required' => "O :attribute é obrigatorio",
+            'status.required' => "O :attribute é obrigatorio",
+            'projeto_id.required' => "O :attribute é obrigatorio",
+            'categoria_id.required' => "O :attribute é obrigatorio"
         ]);
-
-        Tarefa::create($validated);
-        return redirect()->route('tarefas.index')
-                         ->with('success', 'Tarefa criada com sucesso!');
     }
 
-    public function show(Tarefa $tarefa)
+    function store(Request $request)
     {
-        return view('tarefas.show', compact('tarefa'));
+        //dd($request->all());
+        $this->validateForm($request);
+        Tarefa::create($request->all());
+        return redirect('tarefas')->with("success", 'Registro Salvo com sucesso!');
     }
 
-    public function edit(Tarefa $tarefa)
+    function edit($id)
     {
-        $projetos = Projeto::all();
-        $categorias = Categoria::all();
+        $tarefa = Tarefa::find($id);
+        $projetos = Projeto::orderBy('nome')->get();
+        $categorias = Categoria::orderBy('nome')->get();
         return view('tarefas.edit', compact('tarefa', 'projetos', 'categorias'));
     }
 
-    public function update(Request $request, Tarefa $tarefa)
+    function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'titulo' => 'required|max:255',
-            'descricao' => 'nullable',
-            'prioridade' => 'required|in:baixa,media,alta,urgente',
-            'data_vencimento' => 'nullable|date',
-            'status' => 'required|in:pendente,em_andamento,concluida,cancelada',
-            'projeto_id' => 'required|exists:projetos,id',
-            'categoria_id' => 'required|exists:categorias,id'
-        ]);
-
-        $tarefa->update($validated);
-        return redirect()->route('tarefas.index')
-                         ->with('success', 'Tarefa atualizada com sucesso!');
+        //dd($request->all());
+        $this->validateForm($request);
+        Tarefa::find($id)->update($request->all());
+        return redirect('tarefas')->with("success", 'Registro Atualizado com sucesso!');
     }
 
-    public function destroy(Tarefa $tarefa)
+    function destroy($id)
     {
-        $tarefa->delete();
-        return redirect()->route('tarefas.index')
-                         ->with('success', 'Tarefa excluída com sucesso!');
+        Tarefa::destroy($id);
+        return redirect('tarefas')->with("success", 'Registro removido com sucesso!');
+    }
+
+    public function search(Request $request)
+    {
+        if (!empty($request->valor)) {
+            $tarefas = Tarefa::where(
+                $request->tipo,
+                'like',
+                "%$request->valor%"
+            )->get();
+        } else {
+            $tarefas = Tarefa::All();
+        }
+        return view('tarefas.index', compact('tarefas'));
+    }
+
+    /**
+     * Alterna o status da tarefa entre "concluida" e "pendente"
+     * (usado pela checkbox nas listagens). Retorna JSON pro JS
+     * atualizar a linha/card sem precisar recarregar a página.
+     */
+    function toggleStatus($id)
+    {
+        $tarefa = Tarefa::find($id);
+        $tarefa->status = $tarefa->status === 'concluida' ? 'pendente' : 'concluida';
+        $tarefa->save();
+
+        return response()->json([
+            'status' => $tarefa->status,
+            'status_label' => ucfirst(str_replace('_', ' ', $tarefa->status)),
+            'status_class' => match ($tarefa->status) {
+                'concluida' => 'bg-success',
+                'cancelada' => 'bg-danger',
+                'em_andamento' => 'bg-warning',
+                default => 'bg-secondary',
+            },
+        ]);
     }
 }

@@ -29,7 +29,36 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
+            <div class="mb-3">
+                <label for="responsaveis" class="form-label">Responsáveis</label>
+                <input type="text" class="form-control @error('responsaveis') is-invalid @enderror" 
+                    id="responsaveis" name="responsaveis" value="{{ old('responsaveis', $projeto->responsaveis) }}" 
+                    placeholder="Ex: João Silva, Maria Santos">
+                @error('responsaveis')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <small class="text-muted">Separe os nomes por vírgula.</small>
+            </div>
 
+            <div class="mb-3">
+                <label for="cliente" class="form-label">Cliente</label>
+                <input type="text" class="form-control @error('cliente') is-invalid @enderror" 
+                    id="cliente" name="cliente" value="{{ old('cliente', $projeto->cliente) }}" 
+                    placeholder="Ex: Empresa ABC">
+                @error('cliente')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="orcamento" class="form-label">Orçamento (R$)</label>
+                <input type="number" step="0.01" class="form-control @error('orcamento') is-invalid @enderror" 
+                    id="orcamento" name="orcamento" value="{{ old('orcamento', $projeto->orcamento) }}" 
+                    placeholder="Ex: 15000.00">
+                @error('orcamento')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="data_inicio" class="form-label">Data de Início *</label>
