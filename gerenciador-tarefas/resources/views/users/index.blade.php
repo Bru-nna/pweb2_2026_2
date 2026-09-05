@@ -78,7 +78,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" 
-                                        onclick="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                        onclick="return confirm('Tem certeza que deseja excluir esse usuário?')">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
