@@ -7,6 +7,12 @@
     <div class="card-header">
         <h4><i class="bi bi-folder"></i> {{ $projeto->nome }}</h4>
     </div>
+    
+    <!-- IMAGEM DE CAPA ADICIONADA AQUI -->
+    @if($projeto->imagem)
+        <img src="{{ asset('storage/' . $projeto->imagem) }}" class="img-fluid rounded-top" style="max-height: 300px; width: 100%; object-fit: cover;" alt="{{ $projeto->nome }}">
+    @endif
+
     <div class="card-body">
         <p><strong>Descrição:</strong> {{ $projeto->descricao ?? 'Sem descrição' }}</p>
         <p><strong>Data de Início:</strong> {{ date('d/m/Y', strtotime($projeto->data_inicio)) }}</p>
@@ -26,10 +32,29 @@
                         <small class="text-muted">({{ $projeto->equipe->lider->email }})</small>
                     </p>
                 @endif
+
                 @if($projeto->equipe->integrantes->count())
-                    <p class="mb-0"><strong>Integrantes:</strong>
-                        {{ $projeto->equipe->integrantes->pluck('name')->join(', ') }}
-                    </p>
+                    <div class="mt-3">
+                        <strong>Integrantes e Tempo de Foco:</strong>
+                        <ul class="list-unstyled mt-2 mb-0">
+                            @foreach($projeto->equipe->integrantes as $integrante)
+                                <li class="d-flex align-items-center mb-2">
+                                    @if($integrante->imagem)
+                                        <img src="{{ asset('storage/' . $integrante->imagem) }}" width="30" height="30" class="rounded-circle me-2" style="object-fit:cover;">
+                                    @else
+                                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width:30px; height:30px; font-size: 0.8rem;">
+                                            {{ strtoupper(substr($integrante->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    
+                                    <span class="me-2">{{ $integrante->name }}</span>
+                                    <span class="badge bg-danger" title="Tempo total de foco neste projeto">
+                                        <i class="bi bi-clock-history"></i> {{ $integrante->tempoFocadoNoProjeto($projeto->id) }} min
+                                    </span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
             </div>
         @endif
@@ -123,6 +148,14 @@
                                     </span>
                                 </td>
                                 <td>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-pomodoro-tarefa" 
+                                            data-titulo="{{ $tarefa->titulo }}" 
+                                            data-tarefa-id="{{ $tarefa->id }}"
+                                            data-bs-toggle="modal" data-bs-target="#pomodoroModal"
+                                            title="Focar nesta tarefa">
+                                        <i class="bi bi-clock"></i>
+                                    </button>
+                                    
                                     <a href="{{ route('tarefas.edit', $tarefa->id) }}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>

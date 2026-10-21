@@ -8,7 +8,7 @@
         <h4><i class="bi bi-pencil"></i> Editar Projeto</h4>
     </div>
     <div class="card-body">
-        <form action="{{ route('projetos.update', $projeto->id) }}" method="POST">
+        <form action="{{ route('projetos.update', $projeto->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
@@ -17,6 +17,26 @@
                 <input type="text" class="form-control @error('nome') is-invalid @enderror" 
                        id="nome" name="nome" value="{{ old('nome', $projeto->nome) }}" required>
                 @error('nome')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- CAMPO DE IMAGEM ADICIONADO COM PREVIEW -->
+            <div class="mb-3">
+                <label for="imagem" class="form-label">Capa do Projeto</label>
+
+                @if($projeto->imagem)
+                    <div class="mb-2">
+                        <img src="{{ asset('storage/' . $projeto->imagem) }}" 
+                             alt="Capa do Projeto" 
+                             width="150" style="object-fit: cover; border-radius: 8px;">
+                    </div>
+                @endif
+
+                <input type="file" class="form-control @error('imagem') is-invalid @enderror" 
+                       id="imagem" name="imagem" accept="image/*">
+                <small class="text-muted">Deixe em branco para manter a atual. JPG, PNG ou WEBP — máx. 2MB.</small>
+                @error('imagem')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

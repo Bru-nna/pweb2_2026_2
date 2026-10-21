@@ -51,4 +51,20 @@ class User extends Authenticatable
         return $this->belongsToMany(Equipe::class, 'equipe_user')
                     ->withTimestamps();
     }
+
+        // Relacionamento com os registros de Pomodoro
+    public function registrosPomodoros()
+    {
+        return $this->hasMany(RegistroPomodoro::class);
+    }
+
+        // Calcula o tempo total de foco do usuário em um projeto específico
+    public function tempoFocadoNoProjeto($projetoId)
+    {
+        return $this->registrosPomodoros()
+                    ->whereHas('tarefa', function ($query) use ($projetoId) {
+                        $query->where('projeto_id', $projetoId);
+                    })
+                    ->sum('tempo_foco_minutos');
+    }
 }

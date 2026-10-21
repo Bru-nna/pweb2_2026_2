@@ -101,4 +101,29 @@ class EquipeController extends Controller
         return redirect()->route('equipes.index')
                          ->with('success', 'Equipe excluída com sucesso!');
     }
+
+        public function search(Request $request)
+    {
+        $query = Equipe::with(['lider', 'integrantes', 'projetos']);
+
+        if (!empty($request->valor)) {
+            if ($request->tipo === 'lider') {
+                // Busca pelo nome do líder (relacionamento)
+                $query->whereHas('lider', function ($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->valor}%");
+                });
+            } else if ($request->tipo === 'integrante') {
+                // Busca pelo nome de um dos integrantes (relacionamento N:N)
+                $query->whereHas('integrantes', function ($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->valor}%");
+                });
+            } else {
+                // Busca padrão por nome da equipe ou cor
+                $query->where($request->tipo, 'like', "%{$request->valor}%");
+            }
+        }
+
+        $equipes = $query->get();
+        return view('equipes.index', compact('equipes'));
+    }
 }

@@ -84,11 +84,7 @@ class TarefaController extends Controller
         return view('tarefas.index', compact('tarefas'));
     }
 
-    /**
-     * Alterna o status da tarefa entre "concluida" e "pendente"
-     * (usado pela checkbox nas listagens). Retorna JSON pro JS
-     * atualizar a linha/card sem precisar recarregar a página.
-     */
+   
     function toggleStatus($id)
     {
         $tarefa = Tarefa::find($id);
@@ -105,5 +101,20 @@ class TarefaController extends Controller
                 default => 'bg-secondary',
             },
         ]);
+    }
+        public function salvarPomodoro(Request $request)
+    {
+        $request->validate([
+            'tempo_foco_minutos' => 'required|integer',
+            'tarefa_id' => 'nullable|exists:tarefas,id'
+        ]);
+
+        \App\Models\RegistroPomodoro::create([
+            'user_id' => auth()->id(),
+            'tarefa_id' => $request->tarefa_id,
+            'tempo_foco_minutos' => $request->tempo_foco_minutos,
+        ]);
+
+        return response()->json(['success' => true]);
     }
 }

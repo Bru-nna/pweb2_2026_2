@@ -94,6 +94,15 @@
                             </span>
                         </td>
                         <td>
+                            <!-- BOTÃO DO POMODORO ATUALIZADO -->
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-pomodoro-tarefa" 
+                                    data-titulo="{{ $tarefa->titulo }}" 
+                                    data-tarefa-id="{{ $tarefa->id }}"
+                                    data-bs-toggle="modal" data-bs-target="#pomodoroModal"
+                                    title="Focar nesta tarefa">
+                                <i class="bi bi-clock"></i>
+                            </button>
+                            
                             <a href="{{ route('tarefas.edit', $tarefa->id) }}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil"></i>
                             </a>

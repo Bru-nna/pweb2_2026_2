@@ -45,6 +45,11 @@
         @foreach($projetos as $projeto)
             <div class="col-md-6 col-lg-6 mb-4">
                 <div class="card card-shadow h-100">
+                    <!-- IMAGEM DE CAPA ADICIONADA AQUI -->
+                    @if($projeto->imagem)
+                        <img src="{{ asset('storage/' . $projeto->imagem) }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ $projeto->nome }}">
+                    @endif
+                    
                     <div class="card-body">
                         <h5 class="card-title fw-bold">{{ $projeto->nome }}</h5>
                         <p class="card-text text-muted">

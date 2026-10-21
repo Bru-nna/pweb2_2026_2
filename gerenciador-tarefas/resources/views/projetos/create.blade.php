@@ -8,7 +8,7 @@
         <h4><i class="bi bi-plus-circle"></i> Novo Projeto</h4>
     </div>
     <div class="card-body">
-        <form action="{{ route('projetos.store') }}" method="POST">
+        <form action="{{ route('projetos.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
             <div class="mb-3">
@@ -16,6 +16,17 @@
                 <input type="text" class="form-control @error('nome') is-invalid @enderror" 
                        id="nome" name="nome" value="{{ old('nome') }}" required>
                 @error('nome')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <!-- CAMPO DE IMAGEM ADICIONADO -->
+            <div class="mb-3">
+                <label for="imagem" class="form-label">Capa do Projeto</label>
+                <input type="file" class="form-control @error('imagem') is-invalid @enderror" 
+                       id="imagem" name="imagem" accept="image/*">
+                <small class="text-muted">JPG, PNG ou WEBP — máx. 2MB.</small>
+                @error('imagem')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

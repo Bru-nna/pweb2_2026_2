@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\TarefaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EquipeController;
 
 // Rotas de autenticação (visitante)
 Route::middleware('guest')->group(function () {
@@ -52,7 +53,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/tarefas/search', [TarefaController::class, 'search'])->name('tarefas.search');
     Route::patch('/tarefas/{id}/toggle', [TarefaController::class, 'toggleStatus'])->name('tarefas.toggle');
 
+    // Rota do Pomodoro
+    Route::post('/pomodoro/salvar', [TarefaController::class, 'salvarPomodoro'])->name('pomodoro.salvar');
+
+    // Usuários
     Route::resource('users', UserController::class);
     Route::post('/users/search', [UserController::class, 'search'])->name('users.search');
+    
+    
+        // Equipes
     Route::resource('equipes', EquipeController::class);
+    Route::post('/equipes/search', [EquipeController::class, 'search'])->name('equipes.search');
 });

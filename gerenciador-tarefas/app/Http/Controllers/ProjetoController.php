@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Projeto;
 use App\Models\Equipe;
+use Illuminate\Support\Facades\Storage; // ADICIONADO PARA GERENCIAR IMAGENS
 
 class ProjetoController extends Controller
 {
@@ -29,18 +30,28 @@ class ProjetoController extends Controller
             'data_inicio' => 'required',
             'status' => 'required',
             'equipe_id' => 'nullable|exists:equipes,id',
+            'imagem' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048', // ADICIONADO AQUI
         ], [
             'nome.required' => "O :attribute é obrigatorio",
             'data_inicio.required' => "O :attribute é obrigatorio",
             'status.required' => "O :attribute é obrigatorio",
             'equipe_id.exists' => "A equipe selecionada é inválida",
+            'imagem.image' => "O arquivo enviado deve ser uma imagem válida.",
         ]);
     }
 
     function store(Request $request)
     {
         $this->validateForm($request);
-        Projeto::create($request->all());
+        
+        $dados = $request->all();
+
+        // Lógica de Upload de Imagem
+        if ($request->hasFile('imagem')) {
+            $dados['imagem'] = $request->file('imagem')->store('projetos', 'public');
+        }
+
+        Projeto::create($dados);
         return redirect('projetos')->with("success", 'Registro Salvo com sucesso!');
     }
 
@@ -63,13 +74,32 @@ class ProjetoController extends Controller
     function update(Request $request, $id)
     {
         $this->validateForm($request);
-        Projeto::find($id)->update($request->all());
+        
+        $projeto = Projeto::find($id);
+        $dados = $request->all();
+
+        // Lógica de Upload e Remoção de Imagem Antiga
+        if ($request->hasFile('imagem')) {
+            if ($projeto->imagem && Storage::disk('public')->exists($projeto->imagem)) {
+                Storage::disk('public')->delete($projeto->imagem);
+            }
+            $dados['imagem'] = $request->file('imagem')->store('projetos', 'public');
+        }
+
+        $projeto->update($dados);
         return redirect('projetos')->with("success", 'Registro Atualizado com sucesso!');
     }
 
     function destroy($id)
     {
-        Projeto::destroy($id);
+        $projeto = Projeto::find($id);
+        
+        // Deleta a imagem do storage ao excluir o projeto
+        if ($projeto->imagem && Storage::disk('public')->exists($projeto->imagem)) {
+            Storage::disk('public')->delete($projeto->imagem);
+        }
+
+        $projeto->delete();
         return redirect('projetos')->with("success", 'Registro removido com sucesso!');
     }
 

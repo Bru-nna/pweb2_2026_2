@@ -1,5 +1,29 @@
 @extends('layouts.app')
-
+<!-- CARD DE BUSCA ADICIONADO AQUI -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form action="{{ route('equipes.search') }}" method="POST" class="row g-2 align-items-end">
+            @csrf
+            <div class="col-md-4">
+                <label for="tipo" class="form-label mb-1">Buscar por</label>
+                <select name="tipo" id="tipo" class="form-select">
+                    <option value="nome">Nome da Equipe</option>
+                    <option value="lider">Nome do Líder</option>
+                    <option value="integrante">Nome do Integrante</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="valor" class="form-label mb-1">Termo</label>
+                <input type="text" name="valor" id="valor" class="form-control" placeholder="Digite para buscar...">
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @section('content')
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -9,6 +33,7 @@
         </h2>
         <a href="{{ route('equipes.index') }}" class="btn btn-secondary">Voltar</a>
     </div>
+
 
     {{-- Líder --}}
     <div class="card mb-4">
