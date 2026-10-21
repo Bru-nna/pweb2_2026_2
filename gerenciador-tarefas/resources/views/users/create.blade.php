@@ -8,7 +8,7 @@
         <h4><i class="bi bi-plus-circle"></i> Novo Usuário</h4>
     </div>
     <div class="card-body">
-        <form action="{{ route('users.store') }}" method="POST">
+        <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="mb-3">
@@ -25,6 +25,16 @@
                 <input type="email" class="form-control @error('email') is-invalid @enderror" 
                        id="email" name="email" value="{{ old('email') }}" required>
                 @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="imagem" class="form-label">Foto de Perfil</label>
+                <input type="file" class="form-control @error('imagem') is-invalid @enderror" 
+                       id="imagem" name="imagem" accept="image/*">
+                <small class="text-muted">JPG, PNG ou WEBP — máx. 2MB.</small>
+                @error('imagem')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Projeto extends Model
 {
@@ -12,22 +12,22 @@ class Projeto extends Model
     protected $fillable = [
         'nome',
         'descricao',
-        'responsaveis',
+        'equipe_id',
         'cliente',
         'orcamento',
         'data_inicio',
         'data_fim',
         'status',
-        'responsavel_id' 
     ];
+
+    // Equipe responsável pelo projeto
+    public function equipe()
+    {
+        return $this->belongsTo(Equipe::class, 'equipe_id');
+    }
 
     public function tarefas()
     {
         return $this->hasMany(Tarefa::class);
-    }
-
-    public function responsavel()
-    {
-        return $this->belongsTo(User::class, 'responsavel_id');
     }
 }

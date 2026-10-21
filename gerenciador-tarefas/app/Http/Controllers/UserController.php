@@ -5,23 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    // Listar usuários
     public function index()
     {
         $users = User::all();
         return view('users.index', compact('users'));
     }
 
-    // Formulário de criação
     public function create()
     {
         return view('users.create');
     }
 
-    // Salvar novo usuário
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -30,10 +28,15 @@ class UserController extends Controller
             'password' => 'required|min:6|confirmed',
             'telefone' => 'nullable|max:20',
             'cargo' => 'nullable|max:100',
-            'status' => 'required|in:ativo,inativo'
+            'status' => 'required|in:ativo,inativo',
+            'imagem' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        if ($request->hasFile('imagem')) {
+            $validated['imagem'] = $request->file('imagem')->store('users', 'public');
+        }
 
         User::create($validated);
 
@@ -41,19 +44,16 @@ class UserController extends Controller
                          ->with('success', 'Usuário criado com sucesso!');
     }
 
-    // Mostrar um usuário
     public function show(User $user)
     {
         return view('users.show', compact('user'));
     }
 
-    // Formulário de edição
     public function edit(User $user)
     {
         return view('users.edit', compact('user'));
     }
 
-    // Atualizar usuário
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -61,15 +61,23 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'telefone' => 'nullable|max:20',
             'cargo' => 'nullable|max:100',
-            'status' => 'required|in:ativo,inativo'
+            'status' => 'required|in:ativo,inativo',
+            'imagem' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Se a senha foi preenchida, atualiza
         if ($request->filled('password')) {
             $request->validate([
                 'password' => 'min:6|confirmed'
             ]);
             $validated['password'] = Hash::make($request->password);
+        }
+
+        if ($request->hasFile('imagem')) {
+            // remove imagem antiga
+            if ($user->imagem && Storage::disk('public')->exists($user->imagem)) {
+                Storage::disk('public')->delete($user->imagem);
+            }
+            $validated['imagem'] = $request->file('imagem')->store('users', 'public');
         }
 
         $user->update($validated);
@@ -78,13 +86,15 @@ class UserController extends Controller
                          ->with('success', 'Usuário atualizado com sucesso!');
     }
 
-    // Deletar usuário
     public function destroy(User $user)
     {
-        // Impede deletar o próprio usuário
         if ($user->id == auth()->id()) {
             return redirect()->route('users.index')
                              ->with('error', 'Você não pode deletar seu próprio usuário!');
+        }
+
+        if ($user->imagem && Storage::disk('public')->exists($user->imagem)) {
+            Storage::disk('public')->delete($user->imagem);
         }
 
         $user->delete();
@@ -93,7 +103,7 @@ class UserController extends Controller
                          ->with('success', 'Usuário excluído com sucesso!');
     }
 
-        public function search(Request $request)
+    public function search(Request $request)
     {
         $query = User::query();
 

@@ -29,32 +29,22 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="mb-3">
-                <label for="responsaveis" class="form-label">Responsáveis</label>
-                <input type="text" class="form-control @error('responsaveis') is-invalid @enderror" 
-                    id="responsaveis" name="responsaveis" value="{{ old('responsaveis', $projeto->responsaveis) }}" 
-                    placeholder="Ex: João Silva, Maria Santos">
-                @error('responsaveis')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <small class="text-muted">Separe os nomes por vírgula.</small>
-            </div>
 
-                        <div class="mb-3">
-                <label for="responsavel_id" class="form-label">Responsável (Usuário) — relacionamento 1:1</label>
-                <select class="form-select @error('responsavel_id') is-invalid @enderror"
-                        id="responsavel_id" name="responsavel_id">
-                    <option value="">Selecione um responsável...</option>
-                    @foreach($users as $user)
-                        <option value="{{ $user->id }}" {{ old('responsavel_id', $projeto->responsavel_id) == $user->id ? 'selected' : '' }}>
-                            {{ $user->name }}
+            <div class="mb-3">
+                <label for="equipe_id" class="form-label">Equipe Responsável</label>
+                <select class="form-select @error('equipe_id') is-invalid @enderror"
+                        id="equipe_id" name="equipe_id">
+                    <option value="">Selecione uma equipe...</option>
+                    @foreach($equipes as $equipe)
+                        <option value="{{ $equipe->id }}" {{ old('equipe_id', $projeto->equipe_id) == $equipe->id ? 'selected' : '' }}>
+                            {{ $equipe->nome }}@if($equipe->lider) — Líder: {{ $equipe->lider->name }}@endif
                         </option>
                     @endforeach
                 </select>
-                @error('responsavel_id')
+                @error('equipe_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                <small class="text-muted">Cada projeto tem um único usuário responsável.</small>
+                <small class="text-muted">Cada projeto tem uma única equipe responsável.</small>
             </div>
 
             <div class="mb-3">

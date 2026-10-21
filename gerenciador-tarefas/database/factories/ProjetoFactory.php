@@ -2,25 +2,25 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Models\Projeto;
+use App\Models\Equipe;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProjetoFactory extends Factory
 {
+    protected $model = Projeto::class;
+
     public function definition(): array
     {
-        $dataInicio = fake()->dateTimeBetween('-6 months', 'now');
-
         return [
-            'nome' => fake()->unique()->catchPhrase(),
+            'nome' => fake()->sentence(3),
             'descricao' => fake()->paragraph(),
-            'responsaveis' => fake()->name(),
+            'equipe_id' => Equipe::factory(),
             'cliente' => fake()->company(),
             'orcamento' => fake()->randomFloat(2, 1000, 50000),
-            'data_inicio' => $dataInicio,
-            'data_fim' => fake()->optional(0.6)->dateTimeBetween($dataInicio, '+6 months'),
+            'data_inicio' => fake()->date(),
+            'data_fim' => fake()->date(),
             'status' => fake()->randomElement(['planejado', 'em_andamento', 'concluido', 'cancelado']),
-            'responsavel_id' => User::inRandomOrder()->value('id'),
         ];
     }
 }

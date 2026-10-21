@@ -64,17 +64,15 @@
                             </p>
                         @endif
 
-                        @if($projeto->responsaveis)
+                        @if($projeto->equipe)
                             <p class="mb-1">
-                                <strong>Responsáveis:</strong> 
-                                <span class="text-muted">{{ $projeto->responsaveis }}</span>
-                            </p>
-                        @endif
-
-                        @if($projeto->responsavel)
-                            <p class="mb-1">
-                                <strong>Responsável:</strong>
-                                <span class="badge bg-secondary">{{ $projeto->responsavel->name }}</span>
+                                <strong>Equipe:</strong>
+                                <span class="badge" style="background-color: {{ $projeto->equipe->cor ?? '#6c757d' }};">
+                                    {{ $projeto->equipe->nome }}
+                                </span>
+                                @if($projeto->equipe->lider)
+                                    <small class="text-muted">— Líder: {{ $projeto->equipe->lider->name }}</small>
+                                @endif
                             </p>
                         @endif
 
@@ -144,6 +142,4 @@
         @endforeach
     </div>
 @endif
-
-                        
 @endsection

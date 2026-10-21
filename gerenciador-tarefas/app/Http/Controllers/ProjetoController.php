@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Projeto;
-use App\Models\User;
+use App\Models\Equipe;
 
 class ProjetoController extends Controller
 {
     public function index()
     {
-        $projetos = Projeto::with(['responsavel', 'tarefas' => function ($query) {
+        $projetos = Projeto::with(['equipe', 'tarefas' => function ($query) {
             $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
         }])->get();
         return view('projetos.index')->with(['projetos' => $projetos]);
@@ -18,8 +18,8 @@ class ProjetoController extends Controller
 
     function create()
     {
-        $users = User::orderBy('name')->get();
-        return view('projetos.create', compact('users'));
+        $equipes = Equipe::orderBy('nome')->get();
+        return view('projetos.create', compact('equipes'));
     }
 
     function validateForm(Request $request)
@@ -28,12 +28,12 @@ class ProjetoController extends Controller
             'nome' => 'required',
             'data_inicio' => 'required',
             'status' => 'required',
-            'responsavel_id' => 'nullable|exists:users,id',
+            'equipe_id' => 'nullable|exists:equipes,id',
         ], [
             'nome.required' => "O :attribute é obrigatorio",
             'data_inicio.required' => "O :attribute é obrigatorio",
             'status.required' => "O :attribute é obrigatorio",
-            'responsavel_id.exists' => "O responsável selecionado é inválido",
+            'equipe_id.exists' => "A equipe selecionada é inválida",
         ]);
     }
 
@@ -47,7 +47,7 @@ class ProjetoController extends Controller
     function show($id)
     {
         $projeto = Projeto::find($id);
-        $projeto->load(['responsavel', 'tarefas' => function ($query) {
+        $projeto->load(['equipe.integrantes', 'equipe.lider', 'tarefas' => function ($query) {
             $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
         }]);
         return view('projetos.show', compact('projeto'));
@@ -56,8 +56,8 @@ class ProjetoController extends Controller
     function edit($id)
     {
         $projeto = Projeto::find($id);
-        $users = User::orderBy('name')->get();
-        return view('projetos.edit', compact('projeto', 'users'));
+        $equipes = Equipe::orderBy('nome')->get();
+        return view('projetos.edit', compact('projeto', 'equipes'));
     }
 
     function update(Request $request, $id)
@@ -75,7 +75,7 @@ class ProjetoController extends Controller
 
     public function search(Request $request)
     {
-        $query = Projeto::with(['responsavel', 'tarefas' => function ($q) {
+        $query = Projeto::with(['equipe', 'tarefas' => function ($q) {
             $q->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
         }]);
 

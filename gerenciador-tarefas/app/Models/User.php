@@ -8,12 +8,12 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    //factory - permite usar factory 
     use HasFactory;
 
     protected $fillable = [
         'name',
         'email',
+        'imagem',
         'password',
         'telefone',
         'cargo',
@@ -33,15 +33,22 @@ class User extends Authenticatable
         ];
     }
 
-        // Relacionamento 1:1 -> Usuário é responsável por um Projeto
-    public function projetoResponsavel()
-    {
-        return $this->hasOne(Projeto::class, 'responsavel_id');
-    }
-
-    // Relacionamento com tarefas (se um usuário pode ter tarefas)
+    // Relacionamento com tarefas
     public function tarefas()
     {
         return $this->hasMany(Tarefa::class);
+    }
+
+    // Equipes em que o usuário é líder
+    public function equipesLideradas()
+    {
+        return $this->hasMany(Equipe::class, 'lider_id');
+    }
+
+    // Equipes em que o usuário é integrante (N:N)
+    public function equipes()
+    {
+        return $this->belongsToMany(Equipe::class, 'equipe_user')
+                    ->withTimestamps();
     }
 }

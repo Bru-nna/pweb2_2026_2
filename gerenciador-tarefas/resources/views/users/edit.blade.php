@@ -8,7 +8,7 @@
         <h4><i class="bi bi-pencil"></i> Editar Usuário: {{ $user->name }}</h4>
     </div>
     <div class="card-body">
-        <form action="{{ route('users.update', $user->id) }}" method="POST">
+        <form action="{{ route('users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -26,6 +26,26 @@
                 <input type="email" class="form-control @error('email') is-invalid @enderror" 
                        id="email" name="email" value="{{ old('email', $user->email) }}" required>
                 @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="mb-3">
+                <label for="imagem" class="form-label">Foto de Perfil</label>
+
+                @if($user->imagem)
+                    <div class="mb-2">
+                        <img src="{{ asset('storage/' . $user->imagem) }}" 
+                             alt="Foto de {{ $user->name }}" 
+                             width="90" height="90" 
+                             style="object-fit: cover; border-radius: 50%;">
+                    </div>
+                @endif
+
+                <input type="file" class="form-control @error('imagem') is-invalid @enderror" 
+                       id="imagem" name="imagem" accept="image/*">
+                <small class="text-muted">Deixe em branco para manter a atual. JPG, PNG ou WEBP — máx. 2MB.</small>
+                @error('imagem')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>

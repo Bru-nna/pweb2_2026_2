@@ -13,22 +13,34 @@
         @if($projeto->data_fim)
             <p><strong>Data de Término:</strong> {{ date('d/m/Y', strtotime($projeto->data_fim)) }}</p>
         @endif
-        
-        @if($projeto->responsaveis)
-            <p><strong> Responsáveis:</strong> {{ $projeto->responsaveis }}</p>
-        @endif
 
-        @if($projeto->responsavel)
-            <p><strong>Responsável:</strong> {{ $projeto->responsavel->name }} <small class="text-muted">({{ $projeto->responsavel->email }})</small></p>
+        @if($projeto->equipe)
+            <div class="border rounded p-3 mb-3" style="border-left: 6px solid {{ $projeto->equipe->cor ?? '#6c757d' }} !important;">
+                <p class="mb-1">
+                    <strong>Equipe Responsável:</strong>
+                    <span class="badge" style="background-color: {{ $projeto->equipe->cor ?? '#6c757d' }};">{{ $projeto->equipe->nome }}</span>
+                </p>
+                @if($projeto->equipe->lider)
+                    <p class="mb-1">
+                        <strong>Líder:</strong> {{ $projeto->equipe->lider->name }}
+                        <small class="text-muted">({{ $projeto->equipe->lider->email }})</small>
+                    </p>
+                @endif
+                @if($projeto->equipe->integrantes->count())
+                    <p class="mb-0"><strong>Integrantes:</strong>
+                        {{ $projeto->equipe->integrantes->pluck('name')->join(', ') }}
+                    </p>
+                @endif
+            </div>
         @endif
 
         @if($projeto->cliente)
-            <p><strong> Cliente:</strong> {{ $projeto->cliente }}</p>
+            <p><strong>Cliente:</strong> {{ $projeto->cliente }}</p>
         @endif
 
         @if($projeto->orcamento)
             <p>
-                <strong> Orçamento:</strong> 
+                <strong>Orçamento:</strong> 
                 <span>R$ {{ number_format($projeto->orcamento, 2, ',', '.') }}</span>
             </p>
         @endif

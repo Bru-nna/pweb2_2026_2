@@ -8,6 +8,21 @@
         <h4><i class="bi bi-person"></i> {{ $user->name }}</h4>
     </div>
     <div class="card-body">
+
+        <div class="d-flex justify-content-center mb-4">
+            @if($user->imagem)
+                <img src="{{ asset('storage/' . $user->imagem) }}" 
+                     alt="Foto de {{ $user->name }}" 
+                     width="120" height="120" 
+                     style="object-fit: cover; border-radius: 50%;">
+            @else
+                <div class="d-flex align-items-center justify-content-center bg-secondary text-white"
+                     style="width: 120px; height: 120px; border-radius: 50%; font-size: 3rem; font-weight: bold;">
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                </div>
+            @endif
+        </div>
+
         <p><strong>ID:</strong> {{ $user->id }}</p>
         <p><strong>Nome:</strong> {{ $user->name }}</p>
         <p><strong>Email:</strong> {{ $user->email }}</p>

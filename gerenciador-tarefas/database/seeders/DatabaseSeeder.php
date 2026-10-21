@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             ProjetoSeeder::class,
             TarefaSeeder::class,
+            EquipeSeeder::class,   
         ]);
     }
 }

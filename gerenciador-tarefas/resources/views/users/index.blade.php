@@ -42,10 +42,11 @@
     </div>
 @else
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover align-middle">
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Foto</th>
                     <th>Nome</th>
                     <th>Email</th>
                     <th>Telefone</th>
@@ -58,6 +59,19 @@
                 @foreach($users as $user)
                     <tr>
                         <td>{{ $user->id }}</td>
+                        <td>
+                            @if($user->imagem)
+                                <img src="{{ asset('storage/' . $user->imagem) }}" 
+                                     alt="Foto de {{ $user->name }}" 
+                                     width="40" height="40" 
+                                     style="object-fit: cover; border-radius: 50%;">
+                            @else
+                                <div class="d-flex align-items-center justify-content-center bg-secondary text-white"
+                                     style="width: 40px; height: 40px; border-radius: 50%; font-weight: bold;">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->telefone ?? '-' }}</td>

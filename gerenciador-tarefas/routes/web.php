@@ -54,4 +54,5 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('users', UserController::class);
     Route::post('/users/search', [UserController::class, 'search'])->name('users.search');
+    Route::resource('equipes', EquipeController::class);
 });
