@@ -1,33 +1,32 @@
 @extends('layouts.app')
 
-@section('title', 'Lista de Projetos')
+@section('title', 'Projetos')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-folder"></i> Projetos</h1>
-    <a href="{{ route('projetos.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Novo Projeto
+    <h1 class="fs-3 fw-bold mb-0"><i class="bi bi-folder text-primary"></i> Projetos</h1>
+    <a href="{{ route('projetos.create') }}" class="btn btn-primary btn-sm px-3">
+        <i class="bi bi-plus-lg"></i> Novo Projeto
     </a>
 </div>
 
-<div class="card mb-4">
-    <div class="card-body">
+<!-- Busca minimalista -->
+<div class="card mb-4 border-0" style="background-color: transparent;">
+    <div class="card-body p-0">
         <form action="{{ route('projetos.search') }}" method="POST" class="row g-2 align-items-end">
             @csrf
             <div class="col-md-4">
-                <label for="tipo" class="form-label mb-1">Buscar por</label>
-                <select name="tipo" id="tipo" class="form-select">
-                    <option value="nome">Nome</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="status">Status</option>
+                <select name="tipo" id="tipo" class="form-select form-select-sm">
+                    <option value="nome">Buscar por Nome</option>
+                    <option value="cliente">Buscar por Cliente</option>
+                    <option value="status">Buscar por Status</option>
                 </select>
             </div>
             <div class="col-md-6">
-                <label for="valor" class="form-label mb-1">Termo</label>
-                <input type="text" name="valor" id="valor" class="form-control" placeholder="Digite para buscar...">
+                <input type="text" name="valor" id="valor" class="form-control form-control-sm" placeholder="Digite o termo...">
             </div>
             <div class="col-md-2 d-grid">
-                <button type="submit" class="btn btn-outline-primary">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-search"></i> Buscar
                 </button>
             </div>
@@ -36,108 +35,61 @@
 </div>
 
 @if($projetos->isEmpty())
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Nenhum projeto cadastrado.
-        <a href="{{ route('projetos.create') }}" class="alert-link">Crie o primeiro!</a>
+    <div class="alert alert-dark border-secondary text-center py-5">
+        <i class="bi bi-folder-x fs-1 text-muted d-block mb-3"></i>
+        <h5 class="fw-normal">Nenhum projeto encontrado</h5>
+        <a href="{{ route('projetos.create') }}" class="btn btn-outline-primary btn-sm mt-2">Criar primeiro projeto</a>
     </div>
 @else
     <div class="row">
         @foreach($projetos as $projeto)
-            <div class="col-md-6 col-lg-6 mb-4">
-                <div class="card card-shadow h-100">
-                    <!-- IMAGEM DE CAPA ADICIONADA AQUI -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card card-shadow h-100 border-0">
+                    <!-- Imagem de Capa -->
                     @if($projeto->imagem)
-                        <img src="{{ asset('storage/' . $projeto->imagem) }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ $projeto->nome }}">
+                        <div style="height: 140px; overflow: hidden; border-radius: 8px 8px 0 0; position: relative;">
+                            <img src="{{ asset('storage/' . $projeto->imagem) }}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8;" alt="{{ $projeto->nome }}">
+                            <div style="position: absolute; bottom: 0; width: 100%; height: 50%; background: linear-gradient(to top, #1e1e24, transparent);"></div>
+                        </div>
+                    @else
+                        <div style="height: 60px; background: linear-gradient(45deg, #2d2d35, #1e1e24); border-radius: 8px 8px 0 0;"></div>
                     @endif
-                    
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">{{ $projeto->nome }}</h5>
-                        <p class="card-text text-muted">
-                            {{ Str::limit($projeto->descricao, 100) }}
-                        </p>
 
-                        @if($projeto->cliente)
-                            <p class="mb-1">
-                                <strong>Cliente:</strong> {{ $projeto->cliente }}
-                            </p>
-                        @endif
-
-                        @if($projeto->orcamento)
-                            <p class="mb-1">
-                                <strong>Orçamento:</strong> 
-                                R$ {{ number_format($projeto->orcamento, 2, ',', '.') }}
-                            </p>
-                        @endif
-
-                        @if($projeto->equipe)
-                            <p class="mb-1">
-                                <strong>Equipe:</strong>
-                                <span class="badge" style="background-color: {{ $projeto->equipe->cor ?? '#6c757d' }};">
-                                    {{ $projeto->equipe->nome }}
-                                </span>
-                                @if($projeto->equipe->lider)
-                                    <small class="text-muted">— Líder: {{ $projeto->equipe->lider->name }}</small>
-                                @endif
-                            </p>
-                        @endif
-
-                        <div class="mb-2">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar"></i> 
-                                {{ date('d/m/Y', strtotime($projeto->data_inicio)) }}
-                                @if($projeto->data_fim)
-                                    - {{ date('d/m/Y', strtotime($projeto->data_fim)) }}
-                                @endif
-                            </small>
-                            <span class="badge ms-2 bg-{{ $projeto->status == 'concluido' ? 'success' : ($projeto->status == 'cancelado' ? 'danger' : 'primary') }}">
+                    <div class="card-body pt-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold mb-0 text-truncate" title="{{ $projeto->nome }}">{{ $projeto->nome }}</h5>
+                            <span class="badge rounded-pill bg-{{ $projeto->status == 'concluido' ? 'success' : ($projeto->status == 'cancelado' ? 'danger' : 'primary') }}" style="font-size: 0.7rem;">
                                 {{ ucfirst(str_replace('_', ' ', $projeto->status)) }}
                             </span>
                         </div>
+                        
+                        <p class="card-text text-muted small mb-3" style="height: 40px; overflow: hidden;">
+                            {{ Str::limit($projeto->descricao, 80) ?? 'Sem descrição.' }}
+                        </p>
 
-                        <hr class="my-2">
-
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <small class="text-muted fw-semibold"><i class="bi bi-list-task"></i> Tarefas</small><br>
-                            <small class="text-muted">{{ $projeto->tarefas->count() }}</small>
+                        <div class="d-flex align-items-center gap-2 mb-2 small text-muted">
+                            <i class="bi bi-people-fill"></i>
+                            <span>{{ $projeto->equipe->nome ?? 'Sem equipe' }}</span>
+                        </div>
+                        
+                        <div class="d-flex align-items-center gap-2 mb-3 small text-muted">
+                            <i class="bi bi-calendar3"></i>
+                            <span>{{ date('d/m/Y', strtotime($projeto->data_inicio)) }} @if($projeto->data_fim) até {{ date('d/m/Y', strtotime($projeto->data_fim)) }} @endif</span>
                         </div>
 
-                        @if($projeto->tarefas->isEmpty())
-                            <small class="text-muted">Nenhuma tarefa ainda.</small>
-                        @else
-                            <ul class="list-unstyled small mb-0" style="max-height: 150px; overflow-y: auto;">
-                                @foreach($projeto->tarefas as $tarefa)
-                                    <li class="d-flex justify-content-between align-items-center py-1 border-bottom" data-tarefa-row="{{ $tarefa->id }}">
-                                        <span class="d-flex align-items-center text-truncate" style="max-width: 65%;">
-                                            <input type="checkbox"
-                                                class="form-check-input me-2 tarefa-toggle-checkbox"
-                                                data-tarefa-id="{{ $tarefa->id }}"
-                                                data-toggle-url="{{ route('tarefas.toggle', $tarefa->id) }}"
-                                                {{ $tarefa->status === 'concluida' ? 'checked' : '' }}>
-                                            <span class="d-inline-block rounded-circle me-1" style="width:8px; height:8px; background-color: {{ $tarefa->categoria->cor }};"></span>
-                                            <span data-tarefa-titulo="{{ $tarefa->id }}" class="{{ $tarefa->status === 'concluida' ? 'text-decoration-line-through text-muted' : '' }}">
-                                                {{ $tarefa->titulo }}
-                                            </span>
-                                        </span>
-                                        <span class="badge bg-{{ $tarefa->status == 'concluida' ? 'success' : ($tarefa->status == 'cancelada' ? 'danger' : ($tarefa->status == 'em_andamento' ? 'warning' : 'secondary')) }}" data-tarefa-status="{{ $tarefa->id }}">
-                                            {{ ucfirst(str_replace('_', ' ', $tarefa->status)) }}
-                                        </span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-
-                        <div class="mt-3">
-                            <a href="{{ route('projetos.show', $projeto->id) }}" class="px-3 btn btn-sm btn-info">
-                                <i class="bi bi-eye"> Visualizar</i>
+                        <!-- Botões de Ação Unificados -->
+                        <div class="d-flex justify-content-end gap-1 border-top border-secondary pt-3 mt-auto">
+                            <a href="{{ route('projetos.show', $projeto->id) }}" class="btn btn-sm btn-outline-info border-0" title="Visualizar">
+                                <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{{ route('projetos.edit', $projeto->id) }}" class="px-3 btn btn-sm btn-warning">
-                                <i class="bi bi-pencil"> Editar</i>
+                            <a href="{{ route('projetos.edit', $projeto->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Editar">
+                                <i class="bi bi-pencil"></i>
                             </a>
                             <form action="{{ route('projetos.destroy', $projeto->id) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">
-                                    <i class="px-2 bi bi-trash"> Apagar</i>
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Tem certeza que deseja apagar?')" title="Apagar">
+                                    <i class="bi bi-trash"></i>
                                 </button>
                             </form>
                         </div>

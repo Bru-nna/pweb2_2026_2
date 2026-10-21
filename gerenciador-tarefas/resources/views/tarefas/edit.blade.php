@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h4><i class="bi bi-pencil"></i> Editar Tarefa</h4>
+       <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fs-6"><i class="bi bi-plus-circle text-primary"></i> Nova Tarefa</h5>
     </div>
     <div class="card-body">
         <form action="{{ route('tarefas.update', $tarefa->id) }}" method="POST">
@@ -97,12 +97,12 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="{{ route('tarefas.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Voltar
+                        <div class="d-flex justify-content-between mt-4 border-top border-secondary pt-3">
+                <a href="{{ route('tarefas.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Editar tarefa
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Atualizar
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-lg"></i> Atualizar tarefa
                 </button>
             </div>
         </form>

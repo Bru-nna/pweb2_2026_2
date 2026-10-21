@@ -118,12 +118,12 @@
                 @enderror
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="{{ route('projetos.index') }}" class="btn btn-secondary">
+                        <div class="d-flex justify-content-between mt-4 border-top border-secondary pt-3">
+                <a href="{{ route('projetos.index') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Voltar
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Atualizar
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-lg"></i> Atualizar Projeto
                 </button>
             </div>
         </form>

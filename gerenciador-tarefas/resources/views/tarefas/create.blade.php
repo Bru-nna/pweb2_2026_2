@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
-        <h4><i class="bi bi-plus-circle"></i> Nova Tarefa</h4>
+        <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fs-6"><i class="bi bi-plus-circle text-primary"></i> Nova Tarefa</h5>
     </div>
     <div class="card-body">
         <form action="{{ route('tarefas.store') }}" method="POST">
@@ -96,12 +96,12 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="{{ route('tarefas.index') }}" class="btn btn-secondary">
+                        <div class="d-flex justify-content-between mt-4 border-top border-secondary pt-3">
+                <a href="{{ route('tarefas.index') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Voltar
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Salvar
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-lg"></i> Salvar Tarefa
                 </button>
             </div>
         </form>
