@@ -80,7 +80,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ route('projetos.index') }}">
-                <i class="bi bi-check2-square text-primary"></i> TaskManager
+                <i class="bi bi-check2-square text-primary"></i> Gerenciador de Tarefas
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
