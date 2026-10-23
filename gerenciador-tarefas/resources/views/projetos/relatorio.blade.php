@@ -36,6 +36,9 @@
         'pendente' => 'Pendente',
         'cancelada' => 'Cancelada',
     ];
+
+    //soma minutos e converte em horas se passar de 60
+    
     $fmt = function ($m) {
         $m = (int) $m;
         return $m . ' min' . ($m >= 60 ? ' (' . intdiv($m, 60) . 'h' . str_pad($m % 60, 2, '0', STR_PAD_LEFT) . ')' : '');
