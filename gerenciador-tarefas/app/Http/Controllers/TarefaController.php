@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Tarefa;
 use App\Models\Projeto;
 use App\Models\Categoria;
+use ArielMejiaDev\LarapexCharts\LarapexChart;
 
 class TarefaController extends Controller
 {
@@ -105,7 +106,7 @@ class TarefaController extends Controller
         public function salvarPomodoro(Request $request)
     {
         $request->validate([
-            'tempo_foco_minutos' => 'required|integer',
+            'tempo_foco_minutos' => 'required|integer|min:1|max:240',
             'tarefa_id' => 'nullable|exists:tarefas,id'
         ]);
 
@@ -116,5 +117,37 @@ class TarefaController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    // Gráfico de setores: tarefas concluídas, em andamento, pendentes e canceladas
+    public function grafico()
+    {
+        $contagem = Tarefa::selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
+
+        $status = [
+            'concluida' => ['Concluídas', '#198754'],
+            'em_andamento' => ['Em andamento', '#ffc107'],
+            'pendente' => ['Pendentes', '#6c757d'],
+            'cancelada' => ['Canceladas', '#dc3545'],
+        ];
+
+        $labels = [];
+        $dados = [];
+        $cores = [];
+        foreach ($status as $chave => [$rotulo, $cor]) {
+            $labels[] = $rotulo;
+            $dados[] = (int) ($contagem[$chave] ?? 0);
+            $cores[] = $cor;
+        }
+
+        $total = array_sum($dados);
+
+        $grafico = (new LarapexChart)->pieChart()
+            ->setTitle('Tarefas por status')
+            ->addData($dados)
+            ->setLabels($labels)
+            ->setColors($cores);
+
+        return view('tarefas.grafico', compact('grafico', 'labels', 'dados', 'cores', 'total'));
     }
 }

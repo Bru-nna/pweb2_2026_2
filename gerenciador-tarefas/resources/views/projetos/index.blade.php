@@ -79,6 +79,9 @@
 
                         <!-- Botões de Ação Unificados -->
                         <div class="d-flex justify-content-end gap-1 border-top border-secondary pt-3 mt-auto">
+                            <a href="{{ route('projetos.relatorio', $projeto->id) }}" target="_blank" class="btn btn-sm btn-outline-light border-0" title="Gerar relatório (PDF)">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                            </a>
                             <a href="{{ route('projetos.show', $projeto->id) }}" class="btn btn-sm btn-outline-info border-0" title="Visualizar">
                                 <i class="bi bi-eye"></i>
                             </a>

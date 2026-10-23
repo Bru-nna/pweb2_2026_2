@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Projeto;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Equipe;
 use Illuminate\Support\Facades\Storage; // ADICIONADO PARA GERENCIAR IMAGENS
 
@@ -61,7 +63,17 @@ class ProjetoController extends Controller
         $projeto->load(['equipe.integrantes', 'equipe.lider', 'tarefas' => function ($query) {
             $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
         }]);
-        return view('projetos.show', compact('projeto'));
+
+        // Minutos de foco (Pomodoro) por usuário neste projeto, em uma única consulta
+        $focoPorUsuario = $projeto->minutosPorUsuario();
+
+        // Quem focou neste projeto mas não faz parte da equipe responsável
+        $idsEquipe = $projeto->equipe ? $projeto->equipe->integrantes->pluck('id') : collect();
+        $outrosColaboradores = User::whereIn('id', $focoPorUsuario->keys()->diff($idsEquipe))
+            ->orderBy('name')
+            ->get();
+
+        return view('projetos.show', compact('projeto', 'focoPorUsuario', 'outrosColaboradores'));
     }
 
     function edit($id)
@@ -115,5 +127,32 @@ class ProjetoController extends Controller
 
         $projetos = $query->get();
         return view('projetos.index', compact('projetos'));
+    }
+
+    // Relatório em PDF: tarefas (com status) e minutos trabalhados pelos membros da equipe
+    public function relatorio($id)
+    {
+        $projeto = Projeto::with(['equipe.lider', 'equipe.integrantes', 'tarefas' => function ($query) {
+            $query->with('categoria')->orderByRaw('data_vencimento IS NULL, data_vencimento ASC');
+        }])->findOrFail($id);
+
+        $foco = $projeto->minutosPorUsuario();
+
+        // Membros da equipe (o líder sempre entra na lista)
+        $membros = $projeto->equipe ? $projeto->equipe->integrantes : collect();
+        if ($projeto->equipe && $projeto->equipe->lider && !$membros->contains('id', $projeto->equipe->lider->id)) {
+            $membros = $membros->push($projeto->equipe->lider);
+        }
+
+        // Quem trabalhou no projeto sem ser da equipe
+        $outros = User::whereIn('id', $foco->keys()->diff($membros->pluck('id')))
+            ->orderBy('name')
+            ->get();
+
+        $resumoStatus = $projeto->tarefas->countBy('status');
+
+        return Pdf::loadView('projetos.relatorio', compact('projeto', 'foco', 'membros', 'outros', 'resumoStatus'))
+            ->setPaper('a4')
+            ->stream('relatorio-projeto-' . $projeto->id . '.pdf');
     }
 }

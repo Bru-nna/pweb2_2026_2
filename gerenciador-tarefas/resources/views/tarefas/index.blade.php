@@ -5,9 +5,14 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fs-3 fw-bold mb-0"><i class="bi bi-check2-square text-primary"></i> Minhas Tarefas</h1>
-    <a href="{{ route('tarefas.create') }}" class="btn btn-primary btn-sm px-3">
-        <i class="bi bi-plus-lg"></i> Nova Tarefa
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('tarefas.grafico') }}" class="btn btn-outline-info btn-sm px-3">
+            <i class="bi bi-pie-chart"></i> Gerar Gráfico
+        </a>
+        <a href="{{ route('tarefas.create') }}" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-lg"></i> Nova Tarefa
+        </a>
+    </div>
 </div>
 
 <!-- Busca minimalista -->

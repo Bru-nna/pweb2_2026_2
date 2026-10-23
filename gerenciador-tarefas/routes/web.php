@@ -53,15 +53,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/tarefas/search', [TarefaController::class, 'search'])->name('tarefas.search');
     Route::patch('/tarefas/{id}/toggle', [TarefaController::class, 'toggleStatus'])->name('tarefas.toggle');
 
+    // Gráfico de tarefas por status (Larapex)
+    Route::get('/tarefas/grafico', [TarefaController::class, 'grafico'])->name('tarefas.grafico');
+
+    // Relatório em PDF do projeto (DomPDF)
+    Route::get('/projetos/{id}/relatorio', [ProjetoController::class, 'relatorio'])->name('projetos.relatorio');
+
     // Rota do Pomodoro
     Route::post('/pomodoro/salvar', [TarefaController::class, 'salvarPomodoro'])->name('pomodoro.salvar');
 
-    // Usuários
-    Route::resource('users', UserController::class);
+    // Usuários (rotas customizadas SEMPRE antes do resource)
+    Route::get('/users/grafico', [UserController::class, 'grafico'])->name('users.grafico');
+    Route::get('/users/relatorio', [UserController::class, 'relatorio'])->name('users.relatorio');
     Route::post('/users/search', [UserController::class, 'search'])->name('users.search');
-    
-    
-        // Equipes
-    Route::resource('equipes', EquipeController::class);
+    Route::resource('users', UserController::class);
+
+    // Equipes
     Route::post('/equipes/search', [EquipeController::class, 'search'])->name('equipes.search');
+    Route::resource('equipes', EquipeController::class);
 });

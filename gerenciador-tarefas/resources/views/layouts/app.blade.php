@@ -142,8 +142,22 @@
                 <div class="modal-body text-center">
                     
                     <div id="pomodoro-config">
-                        <h6 id="tarefa-foco-nome" class="text-muted mb-4 d-none"></h6>
-                        
+                        <p class="small text-muted mb-3">
+                            <i class="bi bi-person-circle"></i> Foco de: <strong class="text-light">{{ auth()->user()->name }}</strong>
+                        </p>
+
+                        <div class="mb-3 text-start">
+                            <label for="config-tarefa" class="form-label small text-muted">Tarefa</label>
+                            <select class="form-select" id="config-tarefa">
+                                <option value="">Sem tarefa (não conta em nenhum projeto)</option>
+                                @foreach(($tarefasPomodoro ?? []) as $tarefaOpcao)
+                                    <option value="{{ $tarefaOpcao->id }}">
+                                        {{ $tarefaOpcao->titulo }}{{ $tarefaOpcao->projeto ? ' — ' . $tarefaOpcao->projeto->nome : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="row mb-3">
                             <div class="col-4">
                                 <label class="form-label small text-muted">Foco (min)</label>
@@ -168,10 +182,16 @@
                         <div class="timer-display timer-focus" id="timer-display">25:00</div>
                         <p class="text-muted mt-2" id="timer-ciclo-atual">Ciclo 1 de 4</p>
                         <p class="text-muted small" id="timer-tarefa-nome"></p>
-                        
-                        <div class="d-flex justify-content-center gap-2 mt-4">
+
+                        <div class="alert alert-warning small py-2 d-none" id="timer-erro"></div>
+
+                        <div class="d-flex justify-content-center gap-2 mt-4" id="timer-acoes">
                             <button class="btn btn-outline-secondary" id="btn-pausar-timer"><i class="bi bi-pause-fill"></i> Pausar</button>
                             <button class="btn btn-outline-danger" id="btn-cancelar-timer"><i class="bi bi-x-circle"></i> Cancelar</button>
+                        </div>
+
+                        <div class="d-grid mt-4 d-none" id="timer-finalizar">
+                            <button class="btn btn-success" id="btn-finalizar-timer"><i class="bi bi-check-circle"></i> Finalizar</button>
                         </div>
                     </div>
                 </div>
@@ -206,49 +226,77 @@
             });
 
             // 2. Lógica do Pomodoro
+            const USUARIO_POMODORO = @json(auth()->user()->name);
+            const URL_SALVAR_POMODORO = "{{ route('pomodoro.salvar') }}";
+
             const btnGlobal = document.getElementById('btn-pomodoro-global');
-            const tarefaFocoNome = document.getElementById('tarefa-foco-nome');
             const configDiv = document.getElementById('pomodoro-config');
+            const configTarefa = document.getElementById('config-tarefa');
             const timerDiv = document.getElementById('pomodoro-timer');
             const timerDisplay = document.getElementById('timer-display');
             const timerStatus = document.getElementById('timer-status');
             const timerCiclo = document.getElementById('timer-ciclo-atual');
             const timerTarefaNome = document.getElementById('timer-tarefa-nome');
+            const timerErro = document.getElementById('timer-erro');
+            const timerAcoes = document.getElementById('timer-acoes');
+            const timerFinalizar = document.getElementById('timer-finalizar');
             const btnIniciar = document.getElementById('btn-iniciar-pomodoro');
             const btnPausar = document.getElementById('btn-pausar-timer');
             const btnCancelar = document.getElementById('btn-cancelar-timer');
+            const btnFinalizar = document.getElementById('btn-finalizar-timer');
+            const modalEl = document.getElementById('pomodoroModal');
 
             let interval, tempoRestante = 0, emFoco = true, cicloAtual = 1, totalCiclos = 4, pausado = false, tempoFoco = 25, tempoPausa = 5;
-            let tarefaIdAtual = null; 
+            let tarefaIdAtual = null;
+            let timerAtivo = false; // true enquanto o relógio está rodando
 
+            // Botão de relógio em cada tarefa: abre o modal já com a tarefa selecionada
             document.querySelectorAll('.btn-pomodoro-tarefa').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    tarefaIdAtual = this.dataset.tarefaId; 
-                    tarefaFocoNome.textContent = "Tarefa: " + this.dataset.titulo;
-                    tarefaFocoNome.classList.remove('d-none');
-                    timerTarefaNome.textContent = this.dataset.titulo;
+                    if (timerAtivo) return; // não troca a tarefa de um foco em andamento
+                    resetarModal();
+                    configTarefa.value = this.dataset.tarefaId;
                 });
             });
 
-            btnGlobal.addEventListener('click', resetarModal);
+            // Botão do menu: abre o modal sem tarefa pré-selecionada
+            btnGlobal.addEventListener('click', function() {
+                if (timerAtivo) return; // mantém o foco em andamento
+                resetarModal();
+                configTarefa.value = '';
+            });
 
             function resetarModal() {
                 clearInterval(interval);
+                timerAtivo = false;
+                pausado = false;
+                tarefaIdAtual = null;
                 configDiv.classList.remove('d-none');
                 timerDiv.classList.add('d-none');
-                tarefaFocoNome.classList.add('d-none');
-                tarefaFocoNome.textContent = '';
                 timerTarefaNome.textContent = '';
-                pausado = false;
+                timerErro.classList.add('d-none');
+                timerAcoes.classList.remove('d-none');
+                timerFinalizar.classList.add('d-none');
+                btnFinalizar.disabled = false;
                 btnPausar.innerHTML = '<i class="bi bi-pause-fill"></i> Pausar';
-                tarefaIdAtual = null; 
             }
 
             btnIniciar.addEventListener('click', function() {
                 tempoFoco = parseInt(document.getElementById('config-foco').value);
                 tempoPausa = parseInt(document.getElementById('config-pausa').value);
                 totalCiclos = parseInt(document.getElementById('config-ciclos').value);
-                emFoco = true; cicloAtual = 1;
+
+                if ([tempoFoco, tempoPausa, totalCiclos].some(v => isNaN(v) || v < 1)) {
+                    alert('Informe valores válidos (mínimo 1) para foco, pausa e ciclos.');
+                    return;
+                }
+
+                // A tarefa é fixada aqui, no início, para não mudar no meio do foco
+                tarefaIdAtual = configTarefa.value || null;
+                const nomeTarefa = tarefaIdAtual ? configTarefa.options[configTarefa.selectedIndex].text.trim() : 'Sem tarefa';
+                timerTarefaNome.textContent = USUARIO_POMODORO + ' · ' + nomeTarefa;
+
+                emFoco = true; cicloAtual = 1; timerAtivo = true;
                 configDiv.classList.add('d-none'); timerDiv.classList.remove('d-none');
                 iniciarTempo(tempoFoco * 60, 'Foco');
             });
@@ -257,7 +305,7 @@
                 clearInterval(interval);
                 tempoRestante = segundos;
                 timerStatus.textContent = status;
-                if (status === 'Foco') { timerStatus.className = 'mb-3 text-danger'; timerDisplay.className = 'timer-display timer-focus'; } 
+                if (status === 'Foco') { timerStatus.className = 'mb-3 text-danger'; timerDisplay.className = 'timer-display timer-focus'; }
                 else { timerStatus.className = 'mb-3 text-info'; timerDisplay.className = 'timer-display timer-break'; }
                 timerCiclo.textContent = `Ciclo ${cicloAtual} de ${totalCiclos}`;
                 atualizarDisplay();
@@ -273,17 +321,54 @@
                 timerDisplay.textContent = `${String(Math.floor(tempoRestante / 60)).padStart(2, '0')}:${String(tempoRestante % 60).padStart(2, '0')}`;
             }
 
+            // Registra os minutos de foco do usuário logado (o servidor usa auth()->id())
+            function salvarFoco(minutos) {
+                return fetch(URL_SALVAR_POMODORO, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ tempo_foco_minutos: minutos, tarefa_id: tarefaIdAtual })
+                }).then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                });
+            }
+
+            function mostrarErroSalvar() {
+                timerErro.textContent = 'Não foi possível registrar os minutos deste foco. Verifique sua conexão/sessão.';
+                timerErro.classList.remove('d-none');
+            }
+
             function finalizarCiclo() {
                 new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(() => {});
-                if (emFoco) {
-                    fetch("{{ route('pomodoro.salvar') }}", {
-                        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                        body: JSON.stringify({ tempo_foco_minutos: tempoFoco, tarefa_id: tarefaIdAtual })
-                    }).catch(err => console.error(err));
 
-                    if (cicloAtual >= totalCiclos) { timerStatus.textContent = "Concluído!"; timerDisplay.textContent = "00:00"; timerCiclo.textContent = "Todos os ciclos finalizados!"; return; }
-                    emFoco = false; iniciarTempo(tempoPausa * 60, 'Pausa');
-                } else { emFoco = true; cicloAtual++; iniciarTempo(tempoFoco * 60, 'Foco'); }
+                if (!emFoco) {
+                    emFoco = true; cicloAtual++;
+                    iniciarTempo(tempoFoco * 60, 'Foco');
+                    return;
+                }
+
+                const salvando = salvarFoco(tempoFoco).catch(err => { console.error(err); mostrarErroSalvar(); });
+
+                if (cicloAtual >= totalCiclos) {
+                    // Último ciclo: mostra o botão Finalizar (liberado após o registro ser salvo)
+                    timerAtivo = false;
+                    timerStatus.textContent = 'Concluído!';
+                    timerStatus.className = 'mb-3 text-success';
+                    timerDisplay.textContent = '00:00';
+                    timerCiclo.textContent = `Todos os ciclos finalizados! ${tempoFoco * totalCiclos} min de foco.`;
+                    timerAcoes.classList.add('d-none');
+                    timerFinalizar.classList.remove('d-none');
+                    btnFinalizar.disabled = true;
+                    salvando.finally(() => { btnFinalizar.disabled = false; });
+                    return;
+                }
+
+                emFoco = false;
+                iniciarTempo(tempoPausa * 60, 'Pausa');
             }
 
             btnPausar.addEventListener('click', function() {
@@ -293,7 +378,15 @@
 
             btnCancelar.addEventListener('click', function() {
                 resetarModal();
-                bootstrap.Modal.getInstance(document.getElementById('pomodoroModal')).hide();
+                bootstrap.Modal.getInstance(modalEl).hide();
+            });
+
+            btnFinalizar.addEventListener('click', function() {
+                // Se a página mostra o painel da equipe, recarrega para atualizar os minutos
+                const atualizarPagina = document.getElementById('equipe-foco') !== null;
+                resetarModal();
+                bootstrap.Modal.getInstance(modalEl).hide();
+                if (atualizarPagina) location.reload();
             });
         });
     </script>

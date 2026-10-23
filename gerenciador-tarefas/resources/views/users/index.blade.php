@@ -5,9 +5,17 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fs-3 fw-bold mb-0"><i class="bi bi-people text-primary"></i> Usuários</h1>
-    <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm px-3">
-        <i class="bi bi-plus-lg"></i> Novo Usuário
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('users.relatorio') }}" target="_blank" class="btn btn-outline-success btn-sm px-3">
+            <i class="bi bi-file-earmark-pdf"></i> Relatório
+        </a>
+        <a href="{{ route('users.grafico') }}" class="btn btn-outline-info btn-sm px-3">
+            <i class="bi bi-bar-chart"></i> Gerar Gráfico
+        </a>
+        <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-plus-lg"></i> Novo Usuário
+        </a>
+    </div>
 </div>
 
 <div class="card mb-4 border-0" style="background-color: transparent;">

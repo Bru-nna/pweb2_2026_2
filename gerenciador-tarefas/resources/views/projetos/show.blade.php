@@ -6,6 +6,9 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="fs-3 fw-bold mb-0"><i class="bi bi-folder text-primary"></i> {{ $projeto->nome }}</h1>
     <div class="d-flex gap-2">
+        <a href="{{ route('projetos.relatorio', $projeto->id) }}" target="_blank" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-file-earmark-pdf"></i> Gerar Relatório
+        </a>
         <a href="{{ route('projetos.edit', $projeto->id) }}" class="btn btn-outline-warning btn-sm">
             <i class="bi bi-pencil"></i> Editar
         </a>
@@ -61,7 +64,7 @@
     <!-- COLUNA DIREITA: EQUIPE -->
     <div class="col-lg-4 mb-4">
         @if($projeto->equipe)
-            <div class="card card-shadow border-0 h-100">
+            <div class="card card-shadow border-0 h-100" id="equipe-foco">
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="bi bi-people-fill text-muted"></i>
                     <span class="fw-bold text-light">Equipe Responsável</span>
@@ -94,11 +97,30 @@
                                     </div>
                                     <!-- Badge de foco mais sutil, sem fundo vermelho berrante -->
                                     <span class="badge bg-dark border border-secondary text-light" title="Tempo total de foco neste projeto">
-                                        <i class="bi bi-clock text-danger"></i> {{ $integrante->tempoFocadoNoProjeto($projeto->id) }}m
+                                        <i class="bi bi-clock text-danger"></i> {{ (int) ($focoPorUsuario[$integrante->id] ?? 0) }}m
                                     </span>
                                 </li>
                             @endforeach
                         </ul>
+
+                        @if($outrosColaboradores->isNotEmpty())
+                            <small class="text-muted text-uppercase fw-bold d-block mt-4 mb-3" style="font-size: 0.7rem;">Outros colaboradores</small>
+                            <ul class="list-unstyled mb-0">
+                                @foreach($outrosColaboradores as $outro)
+                                    <li class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="text-light" style="font-size: 0.9rem;">{{ $outro->name }}</span>
+                                        <span class="badge bg-dark border border-secondary text-light" title="Tempo total de foco neste projeto">
+                                            <i class="bi bi-clock text-danger"></i> {{ (int) $focoPorUsuario[$outro->id] }}m
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        <div class="border-top border-secondary mt-3 pt-3 d-flex justify-content-between small">
+                            <span class="text-muted">Total de foco no projeto</span>
+                            <strong class="text-light">{{ (int) $focoPorUsuario->sum() }}m</strong>
+                        </div>
                     </div>
                 </div>
             </div>

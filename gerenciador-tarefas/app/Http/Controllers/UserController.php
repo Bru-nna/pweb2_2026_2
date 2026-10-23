@@ -6,9 +6,36 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use ArielMejiaDev\LarapexCharts\LarapexChart;
 
 class UserController extends Controller
 {
+    public function relatorio()
+{
+    $users = User::withCount('equipes')
+        ->withSum('registrosPomodoros', 'tempo_foco_minutos')
+        ->orderBy('name')
+        ->get();
+
+    // Projetos distintos em que cada usuário registrou foco
+    foreach ($users as $user) {
+        $user->projetos_count = $user->registrosPomodoros()
+            ->with('tarefa:id,projeto_id')
+            ->get()
+            ->pluck('tarefa.projeto_id')
+            ->filter()
+            ->unique()
+            ->count();
+    }
+
+    $pdf = Pdf::loadView('users.relatorio', [
+        'users'    => $users,
+        'geradoEm' => now(),
+    ])->setPaper('a4', 'portrait');
+
+    return $pdf->stream('relatorio-usuarios.pdf');
+} 
     public function index()
     {
         $users = User::all();
@@ -32,8 +59,10 @@ class UserController extends Controller
             'imagem' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        //hash é pra ocultar a senha
         $validated['password'] = Hash::make($validated['password']);
-
+        
+        //armazenar imagem no reositório público
         if ($request->hasFile('imagem')) {
             $validated['imagem'] = $request->file('imagem')->store('users', 'public');
         }
@@ -113,5 +142,26 @@ class UserController extends Controller
 
         $users = $query->get();
         return view('users.index', compact('users'));
+    }
+
+    // Gráfico de barras: minutos de foco (Pomodoro) trabalhados por usuário
+    public function grafico()
+    {
+        $users = User::withSum('registrosPomodoros', 'tempo_foco_minutos')
+            ->get()
+            ->sortByDesc(fn ($user) => (int) $user->registros_pomodoros_sum_tempo_foco_minutos)
+            ->values();
+
+        $nomes = $users->pluck('name')->all();
+        $minutos = $users->map(fn ($user) => (int) $user->registros_pomodoros_sum_tempo_foco_minutos)->all();
+        $total = array_sum($minutos);
+
+        $grafico = (new LarapexChart)->barChart()
+            ->setTitle('Minutos trabalhados por usuário')
+            ->addData($minutos, 'Minutos' )
+            ->setXAxis($nomes)
+            ->setColors(['#0d6efd']);
+
+        return view('users.grafico', compact('grafico', 'nomes', 'minutos', 'total'));
     }
 }
